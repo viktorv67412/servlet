@@ -24,24 +24,20 @@ public class AuthenticationFilter implements Filter {
 
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
 
-        String password = req.getParameter("password_login");
-        String login = req.getParameter("login_login");
+        String password = req.getParameter("password_ui");
+        String login = req.getParameter("login_ui");
 
-        if (!StringUtils.isEmpty(login) && StringUtils.isNotEmpty(password)) {
-            InputStream resourceAsStream = UserService.class.getClassLoader().getResourceAsStream("users.properties");
-            Properties properties = new Properties();
-            properties.load(resourceAsStream);
+        InputStream resourceAsStream = UserService.class.getClassLoader().getResourceAsStream("users.properties");
+        Properties properties = new Properties();
+        properties.load(resourceAsStream);
 
-            String adminLogin = properties.getProperty("login_from_property");
-            String adminPassword = properties.getProperty("password_from_property");
+        String adminLogin = properties.getProperty("login_from_property");
+        String adminPassword = properties.getProperty("password_from_property");
 
-            if (login.equals(adminLogin) && password.equals(adminPassword)) {
-                chain.doFilter(req, resp);
-            } else {
-                errorMsg(resp, "Sorry, you aren't admin user!!!");
-            }
+        if (login.equals(adminLogin) && password.equals(adminPassword)) {
+            chain.doFilter(req, resp);
         } else {
-            errorMsg(resp, "ERROR!!!");
+            errorMsg(resp, "Sorry, you aren't admin user!!!");
         }
     }
 

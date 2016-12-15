@@ -30,7 +30,6 @@
 
         <input type="submit" value="add"/>
     </form>
-    <a href="login.jsp">login</a>
 </div>
 
 </body>
