@@ -15,7 +15,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Properties;
 
-@WebFilter(urlPatterns = "/users/*")
+//@WebFilter(urlPatterns = "/users/*")
+@WebFilter(filterName="filterOne", urlPatterns = "/users/*")
 public class AuthenticationFilter implements Filter {
     public void destroy() {
     }

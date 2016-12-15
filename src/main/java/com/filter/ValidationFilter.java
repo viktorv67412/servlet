@@ -18,7 +18,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@WebFilter(urlPatterns = "/users")
+//@WebFilter(urlPatterns = "/users")
+@WebFilter(filterName = "filterTwo", urlPatterns = "/users/*")
 public class ValidationFilter implements Filter {
 
     private Map<String, String> validationMap = new HashMap<String, String>();
@@ -59,20 +60,20 @@ public class ValidationFilter implements Filter {
                 && StringUtils.isNotEmpty(homeAddress)
                 && StringUtils.isNotEmpty(email)) {
 
-            if (!checkEmail(email)) {
+            /*if (!checkEmail(email)) {
                 msg += "Your email is not correct\n";
-            }
+            }*/
             if (!checkPassword(password)) {
                 msg += "To short password\n";
             }
-            if (!checkAge(age)) {
-                msg += "Must be numbers\n";
-            }
+           /* if (!checkAge(age)) {
+                msg += "Age mast be number\n";
+            }*/
             if (!checkPhoneNumber(phoneNumber)) {
-                msg += "Your email is not correct\n";
+                msg += "Use only number\n";
             }
 
-            if (msg.equals("")) {
+            if (!msg.equals("")) {
                 chain.doFilter(request, response);
             } else {
                 errorMsg(response, msg);
