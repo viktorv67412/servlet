@@ -12,6 +12,8 @@ import javax.servlet.annotation.WebFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,8 +21,24 @@ import java.util.regex.Pattern;
 @WebFilter(urlPatterns = "/users")
 public class ValidationFilter implements Filter {
 
-    public void init(FilterConfig filterConfig) throws ServletException {
+    private Map<String, String> validationMap = new HashMap<String, String>();
 
+    public void init(FilterConfig filterConfig) {
+
+        InputStream resourceAsStream = ValidationFilter.class.getClassLoader().getResourceAsStream("validation.properties");
+
+        Properties properties = new Properties();
+
+        try {
+            properties.load(resourceAsStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for (String key : properties.stringPropertyNames()) {
+            String value = properties.getProperty(key);
+            validationMap.put(key, value);
+        }
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -42,7 +60,7 @@ public class ValidationFilter implements Filter {
                 && StringUtils.isNotEmpty(email)) {
 
             if (!checkEmail(email)) {
-                 msg += "Your email is not correct\n";
+                msg += "Your email is not correct\n";
             }
             if (!checkPassword(password)) {
                 msg += "To short password\n";
@@ -64,34 +82,30 @@ public class ValidationFilter implements Filter {
         }
     }
 
-    private void errorMsg(ServletResponse response, String msg) throws IOException {
-        PrintWriter writer = response.getWriter();
+    private void errorMsg(ServletResponse response, String msg) {
+        PrintWriter writer = null;
+        try {
+            writer = response.getWriter();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         writer.println(msg);
         writer.flush();
     }
 
-    private boolean checkPhoneNumber(String phoneNumber) throws IOException {
+    private boolean checkPhoneNumber(String phoneNumber) {
 
-        InputStream resourceAsStream = ValidationFilter.class.getClassLoader().getResourceAsStream("validation.properties");
+        String phoneNumber_from_property = validationMap.get("phoneNumber_from_property.regexp");
 
-        Properties properties = new Properties();
-        properties.load(resourceAsStream);
-
-        String age_from_property = properties.getProperty("phoneNumber_from_property.regexp");
-
-        Pattern pattern = Pattern.compile(age_from_property);
+        Pattern pattern = Pattern.compile(phoneNumber_from_property);
         Matcher matcher = pattern.matcher(phoneNumber);
 
         return matcher.matches();
     }
 
-    private boolean checkAge(String age) throws IOException {
-        InputStream resourceAsStream = ValidationFilter.class.getClassLoader().getResourceAsStream("validation.properties");
+    private boolean checkAge(String age) {
 
-        Properties properties = new Properties();
-        properties.load(resourceAsStream);
-
-        String age_from_property = properties.getProperty("age_from_property.regexp");
+        String age_from_property = validationMap.get("age_from_property.regexp");
 
         Pattern pattern = Pattern.compile(age_from_property);
         Matcher matcher = pattern.matcher(age);
@@ -105,12 +119,7 @@ public class ValidationFilter implements Filter {
 
     private boolean checkEmail(String email) throws IOException {
 
-        InputStream resourceAsStream = ValidationFilter.class.getClassLoader().getResourceAsStream("validation.properties");
-
-        Properties properties = new Properties();
-        properties.load(resourceAsStream);
-
-        String email_from_property = properties.getProperty("email_from_property.regexp");
+        String email_from_property = validationMap.get("email_from_property.regexp");
 
         Pattern pattern = Pattern.compile(email_from_property);
         Matcher matcher = pattern.matcher(email);
