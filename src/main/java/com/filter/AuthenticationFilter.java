@@ -1,4 +1,4 @@
-package com.filter;
+package com;
 
 import com.service.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -15,11 +15,9 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Properties;
 
-@WebFilter(urlPatterns = "/users")
+@WebFilter(urlPatterns = "/users/*")
 public class AuthenticationFilter implements Filter {
-
-    public void init(FilterConfig filterConfig) throws ServletException {
-
+    public void destroy() {
     }
 
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws ServletException, IOException {
@@ -27,17 +25,22 @@ public class AuthenticationFilter implements Filter {
         String password = req.getParameter("password_ui");
         String login = req.getParameter("login_ui");
 
-        InputStream resourceAsStream = UserService.class.getClassLoader().getResourceAsStream("users.properties");
-        Properties properties = new Properties();
-        properties.load(resourceAsStream);
+        if (!StringUtils.isEmpty(login) && StringUtils.isNotEmpty(password)) {
 
-        String adminLogin = properties.getProperty("login_from_property");
-        String adminPassword = properties.getProperty("password_from_property");
+            InputStream resourceAsStream = UserService.class.getClassLoader().getResourceAsStream("users.properties");
 
-        if (login.equals(adminLogin) && password.equals(adminPassword)) {
-            chain.doFilter(req, resp);
+            Properties properties = new Properties();
+            properties.load(resourceAsStream);
+
+            String adminLogin = properties.getProperty("login_from_property");
+            String adminPassword = properties.getProperty("password_from_property");
+            if (login.equals(adminLogin) && password.equals(adminPassword)) {
+                chain.doFilter(req, resp);
+            } else {
+                errorMsg(resp, "Sorry, you aren't admin user!!!");
+            }
         } else {
-            errorMsg(resp, "Sorry, you aren't admin user!!!");
+            errorMsg(resp, "ERROR!!!");
         }
     }
 
@@ -48,7 +51,8 @@ public class AuthenticationFilter implements Filter {
         writer.flush();
     }
 
-    public void destroy() {
+    public void init(FilterConfig config) throws ServletException {
 
     }
+
 }
