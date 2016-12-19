@@ -18,8 +18,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@WebFilter(urlPatterns = "/users")
-@WebFilter(filterName = "filterTwo", urlPatterns = "/users/*")
+@WebFilter(filterName = "filterTwo", urlPatterns = "/users", asyncSupported = true)
 public class ValidationFilter implements Filter {
 
     private Map<String, String> validationMap = new HashMap<String, String>();
@@ -27,7 +26,6 @@ public class ValidationFilter implements Filter {
     public void init(FilterConfig filterConfig) {
 
         InputStream resourceAsStream = ValidationFilter.class.getClassLoader().getResourceAsStream("validation.properties");
-
         Properties properties = new Properties();
 
         try {
@@ -51,8 +49,6 @@ public class ValidationFilter implements Filter {
         String homeAddress = request.getParameter("homeAddress_ui");
         String email = request.getParameter("email_ui");
 
-        String msg = "";
-
         if (!StringUtils.isEmpty(login)
                 && StringUtils.isNotEmpty(password)
                 && StringUtils.isNotEmpty(age)
@@ -60,23 +56,14 @@ public class ValidationFilter implements Filter {
                 && StringUtils.isNotEmpty(homeAddress)
                 && StringUtils.isNotEmpty(email)) {
 
-            /*if (!checkEmail(email)) {
-                msg += "Your email is not correct\n";
-            }*/
-            if (!checkPassword(password)) {
-                msg += "To short password\n";
-            }
-           /* if (!checkAge(age)) {
-                msg += "Age mast be number\n";
-            }*/
-            if (!checkPhoneNumber(phoneNumber)) {
-                msg += "Use only number\n";
-            }
-
-            if (!msg.equals("")) {
-                chain.doFilter(request, response);
+            if (!checkEmail(email)) {
+                errorMsg(response, "Your email is not correct\n");
+            } else if (!checkAge(age)) {
+                errorMsg(response, "Must be number\n");
+            } else if (!checkPhoneNumber(phoneNumber)) {
+                errorMsg(response, "Must be number\n");
             } else {
-                errorMsg(response, msg);
+                chain.doFilter(request, response);
             }
         } else {
             errorMsg(response, ":(");
@@ -90,8 +77,11 @@ public class ValidationFilter implements Filter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        writer.println(msg);
-        writer.flush();
+
+        if (writer != null) {
+            writer.println(msg);
+            writer.flush();
+        }
     }
 
     private boolean checkPhoneNumber(String phoneNumber) {
@@ -112,10 +102,6 @@ public class ValidationFilter implements Filter {
         Matcher matcher = pattern.matcher(age);
 
         return matcher.matches();
-    }
-
-    private boolean checkPassword(String password) {
-        return (password.length() < 8);
     }
 
     private boolean checkEmail(String email) throws IOException {

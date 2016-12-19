@@ -11,8 +11,7 @@ import java.util.List;
 public class UserDaoImpl implements UserDao {
 
     private List<User> users = new ArrayList<User>(
-            Arrays.asList(new User("name1", "password1", "age1", "phoneNumber1", "homeAddress1", "email1"),
-                    new User("name2", "password2", "age2", "phoneNumber2", "homeAddress2", "email2")));
+            Arrays.asList(new User("name1", "password1", "age1", "phoneNumber1", "homeAddress1", "email1")));
 
     public List<User> getAllUsers() {
         return users;

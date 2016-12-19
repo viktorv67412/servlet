@@ -15,9 +15,9 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Properties;
 
-//@WebFilter(urlPatterns = "/users/*")
-@WebFilter(filterName="filterOne", urlPatterns = "/users/*")
+@WebFilter(filterName = "filterOne", urlPatterns = "/users ", asyncSupported = true)
 public class AuthenticationFilter implements Filter {
+
     public void destroy() {
     }
 
@@ -47,7 +47,6 @@ public class AuthenticationFilter implements Filter {
 
     private void errorMsg(ServletResponse resp, String x) throws IOException {
         PrintWriter writer = resp.getWriter();
-
         writer.println(x);
         writer.flush();
     }
